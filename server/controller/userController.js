@@ -26,14 +26,17 @@ const loginUser = asyncHandler(async (req, res) => {
   const findUser = await User.findOne({ email });
 
   if (findUser && (await findUser.isPasswordMatched(password))) {
-    res.json({
+    /*res.json({
       _id: findUser?._id,
       firstname: findUser?.firstname,
       lastname: findUser?.lastname,
       email: findUser?.email,
       phone: findUser?.phone,
       token: generateToken(findUser?._id),
-    });
+    });*/
+    //Trabajo con cookies directamente
+    const token = generateToken(findUser._id, findUser.email);
+    res.cookie("access_token", token, { httpOnly: true }).json(findUser);
   } else {
     throw new Error("Credenciales invalidas");
   }

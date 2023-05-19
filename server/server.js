@@ -3,6 +3,8 @@ const app = express();
 let bodyParser = require("body-parser");
 const { dbConnect } = require("./config/dbConnect");
 require("dotenv").config();
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 const routes = require("./routes/index");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
@@ -16,6 +18,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
 app.use(bodyParser.json());
+
+app.use(cookieParser());
+app.use(cors());
 
 //RUTAS
 app.use("/api", routes);

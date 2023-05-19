@@ -38,13 +38,13 @@ var userSchema = new mongoose.Schema(
     },
     address: [
       {
-        type: ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Address",
       },
     ],
     whislist: [
       {
-        type: ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
       },
     ],
