@@ -31,6 +31,11 @@ var userSchema = new mongoose.Schema(
     role: {
       type: String,
       default: "user",
+      enum: ["admin", "user", "editor"],
+    },
+    isBlocked: {
+      type: Boolean,
+      default: false,
     },
     cart: {
       type: Array,
@@ -48,6 +53,9 @@ var userSchema = new mongoose.Schema(
         ref: "Product",
       },
     ],
+    refreshToken: {
+      type: String,
+    },
   },
   {
     timestamps: true,

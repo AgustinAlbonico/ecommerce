@@ -5,8 +5,10 @@ const jwt = require("jsonwebtoken");
 
 const roleMiddleware = (role) => {
   return AsyncHandler(async (req, res, next) => {
-    if(role !== req.user.role){
-        throw new Error('No tienes los permisos necesarios para seguir');
+    if (req.user.role === "admin") return next();
+    if (role !== req.user.role) {
+      res.statusCode = 401;
+      throw new Error("No tienes los permisos necesarios para continuar");
     }
     next();
   });
