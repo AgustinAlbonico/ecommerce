@@ -29,8 +29,9 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
     throw new Error("No hay token de autenticacion, logueate por favor");
   }
   try {
-    const { id_user, email } = jwt.verify(token, process.env.JWT_SECRET);
+    const { id_user } = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(id_user);
+    console.log(user);
     if (user) {
       req.user = user;
 

@@ -5,6 +5,7 @@ const { dbConnect } = require("./config/dbConnect");
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const morgan = require("morgan");
 
 const routes = require("./routes/index");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
@@ -21,6 +22,7 @@ app.use(bodyParser.json());
 
 app.use(cookieParser());
 app.use(cors());
+app.use(morgan("dev"));
 
 //RUTAS
 app.use("/api", routes);

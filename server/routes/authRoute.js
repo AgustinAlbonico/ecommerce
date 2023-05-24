@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
 const {
@@ -7,16 +7,20 @@ const {
   logoutUser,
   isAuth,
   handleRefreshToken,
-} = require("../controller/userController");
+  updatePassword,
+} = require('../controller/userController');
+const { authMiddleware } = require('../middleware/authMiddleware');
 
-router.post("/register", createUser);
+router.post('/register', createUser);
 
-router.post("/login", loginUser);
+router.post('/login', loginUser);
 
-router.get("/logout", logoutUser);
+router.get('/logout', logoutUser);
 
-router.get("/is-auth", isAuth);
+router.get('/is-auth', isAuth);
 
-router.get("/refresh", handleRefreshToken);
+router.get('/refresh', handleRefreshToken);
+
+router.put('/password', authMiddleware, updatePassword);
 
 module.exports = router;
