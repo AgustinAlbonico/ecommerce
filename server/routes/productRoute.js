@@ -12,7 +12,7 @@ const roles = require('../config/roles');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { roleMiddleware } = require('../middleware/roleMiddleware');
 
-//Rutas
+//RUTAS
 router.post('/', authMiddleware, roleMiddleware(roles.admin), createProduct);
 router.put('/:id', authMiddleware, roleMiddleware(roles.admin), updateProduct);
 router.delete(

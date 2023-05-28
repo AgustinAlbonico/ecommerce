@@ -1,6 +1,6 @@
-const User = require("../models/userModel");
-const jwt = require("jsonwebtoken");
-const asyncHandler = require("express-async-handler");
+const User = require('../models/userModel');
+const jwt = require('jsonwebtoken');
+const asyncHandler = require('express-async-handler');
 
 //Manera vieja, trabaje con headears en vez de cookies
 /*const authMiddleware = asyncHandler(async (req, res, next) => {
@@ -26,15 +26,14 @@ const asyncHandler = require("express-async-handler");
 const authMiddleware = asyncHandler(async (req, res, next) => {
   let token = req.cookies.access_token;
   if (!token) {
-    throw new Error("No hay token de autenticacion, logueate por favor");
+    throw new Error('No hay token de autenticacion, logueate por favor');
   }
   try {
     const { id_user } = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(id_user);
-    console.log(user);
     if (user) {
+      //Paso el user a la request
       req.user = user;
-
       next();
     }
   } catch (error) {

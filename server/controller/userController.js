@@ -4,6 +4,9 @@ const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
 const { validateMongodbID } = require('../utils/validateMongodbID');
 const { generateRefreshToken } = require('../config/refreshToken');
+const { validationResult } = require('express-validator');
+const { sendEmail } = require('./emailController');
+const crypto = require('crypto');
 
 //Register
 const createUser = asyncHandler(async (req, res) => {
@@ -22,6 +25,14 @@ const createUser = asyncHandler(async (req, res) => {
 //Login
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+
+  //Valido los campos ingresados
+  const resultValidation = validationResult(req);
+  const hasErrors = !resultValidation.isEmpty();
+
+  if (hasErrors) {
+    return res.status(400).json(resultValidation.errors[0].msg);
+  }
 
   //Verifico si existe el usuario
   const findUser = await User.findOne({ email });
@@ -53,7 +64,7 @@ const loginUser = asyncHandler(async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
     const token = generateToken(findUser._id, findUser.email);
-    res.cookie('access_token', token, { httpOnly: true }).json(findUser);
+    res.cookie('access_token', token, { httpOnly: true }).json(updateUser);
   } else {
     throw new Error('Credenciales invalidas');
   }
@@ -172,10 +183,12 @@ const blockOrUnblockUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongodbID(id);
   try {
-    const user = await User.findOneAndUpdate({ _id: id }, [
-      { $set: { isBlocked: { $eq: [false, '$isBlocked'] } } },
-    ]);
-    !user.isBlocked
+    const user = await User.findOneAndUpdate(
+      { _id: id },
+      [{ $set: { isBlocked: { $eq: [false, '$isBlocked'] } } }],
+      { new: true }
+    );
+    user.isBlocked
       ? res.json({ message: 'Usuario bloqueado' })
       : res.json({ message: 'Usuario desbloqueado' });
   } catch (error) {
@@ -198,6 +211,37 @@ const updatePassword = asyncHandler(async (req, res) => {
   }
 });
 
+//Enviar mail de reset para password
+const forgotPasswordToken = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) throw new Error('No se encontro ningun usuario con ese mail');
+
+    const token = await user.createPasswordResetToken();
+    await user.save();
+
+    const resetUrl = `Usa este link para resetear tu contraseña. Este link tiene una duracion de 10 minutos. <a href='http://localhost:5000/api/auth/forgot-password-token/${token}'>Haz click aqui!</a>`;
+    const data = {
+      to: email,
+      subject: 'Link para reiniciar contraseña',
+      text: 'Hola!',
+      html: resetUrl,
+    };
+    sendEmail(data);
+    res.json(token);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+//Resetear password
+const resetPassword = asyncHandler(async (req, res) => {
+  const { password } = req.body;
+  const { token } = req.params;
+  const hashedTokens = crypto.createHash('sha256').update(token).digest('hex');
+});
+
 module.exports = {
   createUser,
   loginUser,
@@ -210,4 +254,6 @@ module.exports = {
   blockOrUnblockUser,
   handleRefreshToken,
   updatePassword,
+  forgotPasswordToken,
+  resetPassword,
 };

@@ -1,12 +1,12 @@
-const Router = require("express").Router();
+const Router = require('express').Router();
 
-const authRoute = require("./authRoute");
-const userRoute = require("./userRoute");
-const productRoute = require("./productRoute");
+const authRoute = require('./authRoute');
+const userRoute = require('./userRoute');
+const productRoute = require('./productRoute');
 
 //Rutas
-Router.use("/auth", authRoute);
-Router.use("/user", userRoute);
-Router.use("/product", productRoute);
+Router.use('/auth', authRoute);
+Router.use('/users', userRoute);
+Router.use('/products', productRoute);
 
 module.exports = Router;
