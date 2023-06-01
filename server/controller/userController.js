@@ -221,7 +221,7 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
     const token = await user.createPasswordResetToken();
     await user.save();
 
-    const resetUrl = `Usa este link para resetear tu contraseña. Este link tiene una duracion de 10 minutos. <a href='http://localhost:5000/api/auth/forgot-password-token/${token}'>Haz click aqui!</a>`;
+    const resetUrl = `Usa este link para resetear tu contraseña. Este link tiene una duracion de 10 minutos. <a href='http://localhost:5000/api/auth/reset-password/${token}'>Haz click aqui!</a>`;
     const data = {
       to: email,
       subject: 'Link para reiniciar contraseña',
@@ -239,7 +239,20 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
 const resetPassword = asyncHandler(async (req, res) => {
   const { password } = req.body;
   const { token } = req.params;
-  const hashedTokens = crypto.createHash('sha256').update(token).digest('hex');
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  if (!user)
+    throw new Error(
+      'El token expiro, por favor intentalo nuevamente mas tarde'
+    );
+  user.password = password;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+  res.json(user);
 });
 
 module.exports = {

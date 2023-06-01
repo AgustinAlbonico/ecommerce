@@ -22,6 +22,6 @@ router.get('/is-auth', isAuth);
 router.get('/refresh', handleRefreshToken);
 router.put('/password', authMiddleware, updatePassword);
 router.post('/forgot-password-token', forgotPasswordToken);
-router.get('/forgot-password-token/:token', resetPassword);
+router.put('/reset-password/:token', resetPassword);
 
 module.exports = router;
