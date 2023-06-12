@@ -1,4 +1,4 @@
-const Category = require('../models/prodcategoryModel');
+const Category = require('../models/prodCatModel');
 const asyncHandler = require('express-async-handler');
 const { validateMongodbID } = require('../utils/validateMongodbID');
 
@@ -44,6 +44,8 @@ const getCategory = asyncHandler(async (req, res) => {
   validateMongodbID(id);
   try {
     const category = await Category.findById(id);
+    if (!category)
+      throw new Error('No existe Categoria de producto con esta ID');
     res.json(category);
   } catch (error) {
     throw new Error(error);

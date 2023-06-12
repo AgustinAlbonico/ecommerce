@@ -6,7 +6,7 @@ const {
   deleteCategory,
   getCategories,
   getCategory,
-} = require('../controller/categoryController');
+} = require('../controller/blogCatController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { roleMiddleware } = require('../middleware/roleMiddleware');
 
