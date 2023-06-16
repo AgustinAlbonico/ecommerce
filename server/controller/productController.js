@@ -2,6 +2,7 @@ const Product = require('../models/productModel');
 const User = require('../models/userModel');
 const asyncHandler = require('express-async-handler');
 const slugify = require('slugify');
+const { validateMongodbID } = require('../utils/validateMongodbID');
 
 //Create one product
 const createProduct = asyncHandler(async (req, res) => {
@@ -132,6 +133,61 @@ const addToWishList = asyncHandler(async (req, res) => {
   }
 });
 
+//Rating de un producto
+const rating = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { star, prodId, comment } = req.body;
+  validateMongodbID(_id);
+  try {
+    const prod = await Product.findById(prodId);
+    if (!prod) res.json('No se encontro ningun producto').status(420);
+    let alreadyRated = prod.ratings.find(
+      (rating) => rating.postedby.toString() === _id.toString()
+    );
+    if (alreadyRated) {
+      await Product.updateOne(
+        {
+          ratings: { $elemMatch: alreadyRated },
+        },
+        { $set: { 'ratings.$.star': star, 'ratings.$.comment': comment } },
+        { new: true }
+      );
+    } else {
+      await Product.findByIdAndUpdate(
+        prodId,
+        {
+          $push: {
+            ratings: {
+              star,
+              comment,
+              postedby: _id,
+            },
+          },
+        },
+        {
+          new: true,
+        }
+      );
+    }
+    const getallratings = await Product.findById(prodId);
+    let totalRating = getallratings.ratings.length;
+    let ratingsum = getallratings.ratings
+      .map((item) => item.star)
+      .reduce((prev, curr) => prev + curr, 0);
+    let actualRating = Math.round(ratingsum / totalRating);
+    let finalproduct = await Product.findByIdAndUpdate(
+      prodId,
+      {
+        totalrating: actualRating,
+      },
+      { new: true }
+    );
+    res.json(finalproduct);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
 module.exports = {
   createProduct,
   getOneProduct,
@@ -139,4 +195,5 @@ module.exports = {
   updateProduct,
   deleteProduct,
   addToWishList,
+  rating,
 };
