@@ -9,7 +9,7 @@ const { sendEmail } = require('./emailController');
 const crypto = require('crypto');
 
 //Register
-const createUser = asyncHandler(async (req, res) => {
+const registerUser = asyncHandler(async (req, res) => {
   let email = req.body.email;
   let findUser = await User.findOne({ email });
 
@@ -19,7 +19,39 @@ const createUser = asyncHandler(async (req, res) => {
 
   let newUser = await User.create(req.body);
 
+  let emailToken = await newUser.createEmailVerificationToken();
+  await newUser.save();
+
+  //Envio mail con TOKEN de confirmacion de cuenta
+  const resetUrl = `Hola <h2>${newUser.lastname}, ${newUser.firstname}!</h2> <br> Usa este link para confirmar tu cuenta:<a href='http://localhost:5000/api/auth/validate-email/${emailToken}'>Haz click aqui!</a>`;
+  const data = {
+    to: email,
+    from: '"Link para confirmar tu cuenta!" <asd@example.com>',
+    subject: 'Link para confirmar tu cuenta!',
+    text: 'Hola!',
+    html: resetUrl,
+  };
+  sendEmail(data);
+
   res.json(newUser);
+});
+
+//Validate email token
+const validateEmailToken = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  try {
+    const user = await User.findOne({
+      emailValidationToken: hashedToken,
+    });
+    if (!user) return res.json('No se ha encontrado el usuario');
+    user.isVerified = true;
+    user.emailValidationToken = undefined;
+    await user.save();
+    res.json(user);
+  } catch (error) {
+    throw new Error(error);
+  }
 });
 
 //Login
@@ -37,7 +69,11 @@ const loginUser = asyncHandler(async (req, res) => {
   //Verifico si existe el usuario
   const findUser = await User.findOne({ email });
 
-  if (findUser && (await findUser.isPasswordMatched(password))) {
+  if (
+    findUser &&
+    (await findUser.isPasswordMatched(password)) &&
+    findUser.isVerified
+  ) {
     /*res.json({
       _id: findUser?._id,
       firstname: findUser?.firstname,
@@ -66,6 +102,8 @@ const loginUser = asyncHandler(async (req, res) => {
     const token = generateToken(findUser._id, findUser.email);
     res.cookie('access_token', token, { httpOnly: true }).json(updateUser);
   } else {
+    if (!findUser.isVerified)
+      throw new Error('Usuario con email no verificado');
     throw new Error('Credenciales invalidas');
   }
 });
@@ -224,11 +262,12 @@ const forgotPasswordToken = asyncHandler(async (req, res) => {
     const resetUrl = `Usa este link para resetear tu contraseña. Este link tiene una duracion de 10 minutos. <a href='http://localhost:5000/api/auth/reset-password/${token}'>Haz click aqui!</a>`;
     const data = {
       to: email,
+      from: '"Link para confirmar tu cuenta!" <asd@example.com>',
       subject: 'Link para reiniciar contraseña',
       text: 'Hola!',
       html: resetUrl,
     };
-    sendEmail(data);
+    sendEmailResetPassword(data);
     res.json(token);
   } catch (error) {
     throw new Error(error);
@@ -256,7 +295,8 @@ const resetPassword = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  createUser,
+  registerUser,
+  validateEmailToken,
   loginUser,
   getUsers,
   getOneUser,

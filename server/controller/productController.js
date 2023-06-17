@@ -140,7 +140,7 @@ const rating = asyncHandler(async (req, res) => {
   validateMongodbID(_id);
   try {
     const prod = await Product.findById(prodId);
-    if (!prod) res.json('No se encontro ningun producto').status(420);
+    //if (!prod) res.json('No se encontro ningun producto').status(420);
     let alreadyRated = prod.ratings.find(
       (rating) => rating.postedby.toString() === _id.toString()
     );

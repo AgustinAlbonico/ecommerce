@@ -57,9 +57,14 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
+    emailValidationToken: { type: String },
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -87,6 +92,15 @@ userSchema.methods.createPasswordResetToken = async function () {
     .digest('hex');
   this.passwordResetExpires = Date.now() + 30 * 60 * 1000; //10 Minutos
   return resetToken;
+};
+
+userSchema.methods.createEmailVerificationToken = async function () {
+  const emailToken = crypto.randomBytes(32).toString('hex');
+  this.emailValidationToken = crypto
+    .createHash('sha256')
+    .update(emailToken)
+    .digest('hex');
+  return emailToken;
 };
 
 //Export the model
