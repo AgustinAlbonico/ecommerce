@@ -39,10 +39,7 @@ const blogSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
-    image: {
-      type: String,
-      default: 'https://www.mediasource.mx/hubfs/blog-files/que-es-blog.jpg',
-    },
+    images: [],
     author: {
       type: String,
       default: 'admin',

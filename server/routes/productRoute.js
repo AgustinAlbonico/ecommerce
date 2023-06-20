@@ -8,23 +8,34 @@ const {
   deleteProduct,
   addToWishList,
   rating,
+  uploadImages,
 } = require('../controller/productController');
 
-const roles = require('../config/roles');
+const { uploadPhoto, productImgResize } = require('../middleware/uploadImage');
+
+const ROLES = require('../config/roles');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { roleMiddleware } = require('../middleware/roleMiddleware');
 
 //RUTAS
 router.put('/rating', authMiddleware, rating);
+router.put(
+  '/upload/:id',
+  authMiddleware,
+  roleMiddleware(ROLES.admin),
+  uploadPhoto.array('images', 10),
+  productImgResize,
+  uploadImages
+);
 router.put('/wishlist', authMiddleware, addToWishList);
 router.delete(
   '/:id',
   authMiddleware,
-  roleMiddleware(roles.admin),
+  roleMiddleware(ROLES.admin),
   deleteProduct
 );
-router.post('/', authMiddleware, roleMiddleware(roles.admin), createProduct);
-router.put('/:id', authMiddleware, roleMiddleware(roles.admin), updateProduct);
+router.post('/', authMiddleware, roleMiddleware(ROLES.admin), createProduct);
+router.put('/:id', authMiddleware, roleMiddleware(ROLES.admin), updateProduct);
 router.get('/:id', getOneProduct);
 router.get('/', getProducts);
 
