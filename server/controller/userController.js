@@ -10,6 +10,7 @@ const crypto = require('crypto');
 
 //Register
 const registerUser = asyncHandler(async (req, res) => {
+  //Valido que el usuario no exista
   let email = req.body.email;
   let findUser = await User.findOne({ email });
 
@@ -17,8 +18,9 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error('El usuario ya existe!');
   }
 
+  //Creo el usuario
   let newUser = await User.create(req.body);
-
+  ////SE PUEDE MEJORAR LOGIA DE TOKEN, CREAR UN ARCHIVO CREATETOKEN EN CONFIG Y MANDAR LA TOKEN COMO PARAMETRO(PARA NO REPETIR CODIGO)
   let emailToken = await newUser.createEmailVerificationToken();
   await newUser.save();
 
@@ -103,7 +105,7 @@ const loginUser = asyncHandler(async (req, res) => {
     res.cookie('access_token', token, { httpOnly: true }).json(updateUser);
   } else {
     if (!findUser.isVerified)
-      throw new Error('Usuario con email no verificado');
+      throw new Error('Usuario con email no verificado', 404);
     throw new Error('Credenciales invalidas');
   }
 });

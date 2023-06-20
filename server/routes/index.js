@@ -7,6 +7,7 @@ const blogRoute = require('./blogRoute');
 const prodCatRoute = require('./prodCatRoute');
 const blogCatRoute = require('./blogCatRoute');
 const brandRoute = require('./brandRoute');
+const couponRoute = require('./couponRoute');
 
 //Rutas
 Router.use('/auth', authRoute);
@@ -16,5 +17,6 @@ Router.use('/blogs', blogRoute);
 Router.use('/prod-category', prodCatRoute);
 Router.use('/blog-category', blogCatRoute);
 Router.use('/brand', brandRoute);
+Router.use('/coupon', couponRoute);
 
 module.exports = Router;
