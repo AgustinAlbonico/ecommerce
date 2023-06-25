@@ -4,6 +4,7 @@ const router = express.Router();
 const {
   registerUser,
   loginUser,
+  loginAdmin,
   logoutUser,
   isAuth,
   handleRefreshToken,
@@ -18,6 +19,7 @@ const loginValidator = require('../validator/loginValidator');
 //RUTAS
 router.post('/register', registerUser);
 router.post('/login', loginValidator, loginUser);
+router.post('/admin-login', loginAdmin);
 router.get('/logout', logoutUser);
 router.get('/is-auth', isAuth);
 router.get('/refresh', handleRefreshToken);
