@@ -21,19 +21,37 @@ cloudinary.config({
   });
 };*/
 const cloudinaryUploadImg = (fileToUpload) => {
-  return new Promise((resolve, reject) => {
-    cloudinary.v2.uploader.upload(
-      fileToUpload,
-      { resource_type: 'auto' },
-      (error, result) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve({ url: result.secure_url });
+  return new Promise((resolve) => {
+    cloudinary.v2.uploader.upload(fileToUploads, (result) => {
+      resolve(
+        {
+          url: result.secure_url,
+          asset_id: result.asset_id,
+          public_id: result.public_id,
+        },
+        {
+          resource_type: 'auto',
         }
-      }
-    );
+      );
+    });
   });
 };
 
-module.exports = cloudinaryUploadImg;
+const cloudinaryDeleteImg = (fileToDelete) => {
+  return new Promise((resolve) => {
+    cloudinary.v2.uploader.destroy(fileToDelete, (result) => {
+      resolve(
+        {
+          url: result.secure_url,
+          asset_id: result.asset_id,
+          public_id: result.public_id,
+        },
+        {
+          resource_type: 'auto',
+        }
+      );
+    });
+  });
+};
+
+module.exports = { cloudinaryUploadImg, cloudinaryDeleteImg };

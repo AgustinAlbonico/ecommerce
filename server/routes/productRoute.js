@@ -9,6 +9,7 @@ const {
   addToWishList,
   rating,
   uploadImages,
+  deleteImages,
 } = require('../controller/productController');
 
 const { uploadPhoto, productImgResize } = require('../middleware/uploadImage');
@@ -20,12 +21,18 @@ const { roleMiddleware } = require('../middleware/roleMiddleware');
 //RUTAS
 router.put('/rating', authMiddleware, rating);
 router.put(
-  '/upload/:id',
+  '/images',
   authMiddleware,
   roleMiddleware(ROLES.admin),
   uploadPhoto.array('images', 10),
   productImgResize,
   uploadImages
+);
+router.delete(
+  '/images/:id',
+  authMiddleware,
+  roleMiddleware(ROLES.admin),
+  deleteImages
 );
 router.put('/wishlist', authMiddleware, addToWishList);
 router.delete(
